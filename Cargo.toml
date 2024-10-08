@@ -6,3 +6,12 @@ edition = "2021"
 [dependencies]
 base64 = "0.22.1"
 flate2 = "1.0.34"
+
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+
+[[bench]]
+name = "compression_comparison"
+harness = false
