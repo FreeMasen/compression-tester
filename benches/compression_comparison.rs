@@ -1,34 +1,24 @@
-use std::{fs::File, io::{BufReader, Read}, path::Path};
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+    path::Path,
+};
 
-use compression_tester::gzip_encode;
+use compression_tester::gzip_encode_full;
 use criterion::{black_box, Criterion};
 use flate2::Compression;
 
-fn read_file_into_drain(p: impl AsRef<Path>) {
-    let mut reader = BufReader::new(File::open(p.as_ref()).unwrap());
-    loop {
-        let mut rb = [0u8;4096];
-        let len = reader.read(&mut rb).unwrap();
-        if len == 0 {
-            break;
-        }
-        black_box(rb);
-    }
-}
-
 pub fn default_compression(c: &mut Criterion) {
+    let payload = std::fs::read("./payload.json").unwrap();
     let mut group = c.benchmark_group("default");
-    group.bench_function("baseline-no-compression", |b| {
-        b.iter(|| read_file_into_drain("./payload.json"));
-    });
     group.bench_function("default_compression", |b| {
-        b.iter(|| black_box(gzip_encode("./payload.json", Compression::default())))
+        b.iter(|| black_box(gzip_encode_full(&payload, Compression::default())))
     });
     group.bench_function("best_compression", |b| {
-        b.iter(|| black_box(gzip_encode("./payload.json", Compression::best())))
+        b.iter(|| black_box(gzip_encode_full(&payload, Compression::best())))
     });
     group.bench_function("fast_compression", |b| {
-        b.iter(|| black_box(gzip_encode("./payload.json", Compression::best())))
+        b.iter(|| black_box(gzip_encode_full(&payload, Compression::best())))
     });
     group.finish();
 }
